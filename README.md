@@ -1,88 +1,237 @@
 #  0714 02 CSE 2100
 
 Documentation: Code Quality Improvements
-1. Modularization of Code
 
-The improved version of the code will follow a modular design approach by logically separating functionality into well-defined sections. Instead of writing all logic in a single continuous flow, the program will be divided into independent modules such as:
+# File Search Utility — v2
 
-Utility functions (string comparison, path handling)
+A lightweight Windows desktop application written in **C language** that allows users to search for files and folders by name through a clean graphical user interface (GUI). Built entirely using the Windows API (WinAPI) without any external libraries.
 
-File searching logic
+---
 
-Result handling
+## Table of Contents
 
-GUI event handling
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Build](#build)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [How It Works](#how-it-works)
+- [Tech Stack](#tech-stack)
+- [Known Limitations](#known-limitations)
+- [Future Improvements](#future-improvements)
+- [License](#license)
 
-Window procedure and application entry point
+---
 
-Each module will be responsible for a specific task. This modularization will improve readability and maintainability, and it will make the code easier to extend or debug in the future. Logical grouping will allow developers to understand the program structure quickly without reading the entire codebase.
+## Features
 
-2. Clear Function Responsibility
+- Search files **and** folders by name simultaneously
+- **Case-insensitive** search — no need to worry about uppercase or lowercase
+- **Recursive search** — automatically scans all sub-folders inside the selected directory
+- Displays search results in a structured table with **Type**, **Path**, and **Size** columns
+- Shows file size in a human-readable format (B / KB / MB)
+- **Browse button** for easy folder selection using the system folder picker dialog
+- **Clear button** to reset results and start a new search
+- Minimal and responsive GUI with a custom header bar
+- Built as a standalone `.exe` — no installation required
 
-Every function in the improved code will follow the single responsibility principle, meaning each function will perform only one well-defined task.
+---
 
-Examples:
+## Requirements
 
-String comparison functions will handle only case-insensitive comparisons.
+- **Operating System:** Windows 7 or later
+- **Compiler:** GCC via MinGW — download from [winlibs.com](https://winlibs.com)
 
-Path-related functions will construct valid file paths.
+---
 
-Search functions will perform directory traversal and matching.
+## Installation
 
-GUI handler functions will respond only to user actions such as clicking buttons.
+### Step 1 — Download MinGW
 
-This separation will ensure that changes in one part of the system will not unintentionally affect other parts. It will also simplify testing and debugging because each function will have a clear and predictable behavior.
+Go to [winlibs.com](https://winlibs.com) and download the latest **GCC + MinGW-w64** release (Win64, ZIP format).
 
-3. Consistent Naming Conventions
+### Step 2 — Extract MinGW
 
-The improved code will use consistent and meaningful naming conventions throughout the program:
+Extract the ZIP file and place the folder at:
+```
+C:\mingw64
+```
 
-Function names will clearly describe their purpose (e.g., search_directory, handle_search).
+### Step 3 — Add MinGW to PATH
 
-Global variables will use a clear prefix to indicate shared application state.
+1. Open Start Menu and search for **"Environment Variables"**
+2. Click **"Edit the system environment variables"**
+3. Under **System Variables**, find **Path** and click **Edit**
+4. Click **New** and add:
+   ```
+   C:\mingw64\bin
+   ```
+5. Click **OK** on all dialogs
 
-Constants will be written in uppercase to distinguish them from variables.
+### Step 4 — Verify Installation
 
-Identifiers will follow a uniform style, avoiding ambiguity or mixed naming patterns.
+Open a terminal (PowerShell or CMD) and run:
+```
+gcc --version
+```
+If a version number appears, the installation was successful.
 
-Consistent naming will improve code readability and will reduce confusion, especially when multiple developers will work on the same codebase or when the code will be reviewed later.
+---
 
-4. Improved Error Handling
+## Build
 
-The improved version will include better validation and error handling at critical points:
+Open a terminal inside the project folder and run the build script:
 
-User inputs will be validated before performing file system operations.
+```
+.\build.bat
+```
 
-Invalid directories and empty inputs will be detected early.
+The script will:
+1. Check if GCC is available
+2. Create the `bin\` and `build\` directories if they do not exist
+3. Compile all source files
+4. Output the executable to `bin\FileSearch.exe`
 
-Appropriate error messages will be shown to the user using dialog boxes.
+---
 
-File system operations will be safely checked before proceeding.
+## Usage
 
-This will prevent unexpected behavior, will improve program stability, and will provide clear feedback to the user instead of allowing silent failures or crashes.
+Run the application:
+```
+bin\FileSearch.exe
+```
+Or double-click `FileSearch.exe` inside the `bin\` folder.
 
-5. Use of Header Files (Conceptual Design)
+### Step-by-Step Guide
 
-Although the program will be implemented in a single source file, it will be structured in a way that will allow easy separation into header (.h) and source (.c) files.
+1. Click the **Browse** button to open the folder picker and select the root directory where you want to search
+2. Type the file or folder name (or part of it) in the **"File / Folder Name"** input box
+   - Example: typing `mydocs` will match `mydocs.txt`, `mydocs_backup`, `my_mydocs_folder`, etc.
+3. Click **Search**
+4. All matching files and folders will appear in the result table below
+5. Click **Clear** to reset the results and perform a new search
 
-Conceptually:
+### Result Table
 
-Function declarations will be placed in header files.
+| Column | Description |
+|--------|-------------|
+| Type   | Indicates whether the result is a `FILE` or `FOLDER` |
+| Path   | The full absolute path of the file or folder |
+| Size   | File size displayed as B, KB, or MB (folders show `—`) |
 
-Implementation details will remain in source files.
+---
 
-Constants and shared structures will be declared centrally.
+## Project Structure
 
-This design approach will improve scalability and will align with professional C programming practices, even if physical header files will not be used in this version.
+```
+file-search-utility/
+├── src/
+│   ├── main.c        → Program entry point — initializes the window and runs the message loop
+│   ├── gui.c         → All GUI logic — window creation, controls, layout, and event handling
+│   ├── search.c      → Core search engine — traverses directories and finds matches
+│   └── utils.c       → Utility functions — string helpers and file size formatter
+│
+├── include/
+│   ├── gui.h         → Declarations for GUI functions and control IDs
+│   ├── search.h      → Declarations for search functions and result data structures
+│   └── utils.h       → Declarations for utility/helper functions
+│
+├── bin/              → Output directory — contains FileSearch.exe after build
+├── build/            → Intermediate directory — contains compiled object files
+├── build.bat         → Windows batch script to compile the project
+├── .gitignore        → Tells Git to ignore bin/, build/, and compiled files
+└── README.md         → Project documentation
+```
 
-6. Encapsulation
+---
 
-Encapsulation will be achieved by limiting direct access to internal logic and data:
+## Architecture
 
-Helper functions will be declared as static, restricting their scope to the current file.
+The project follows a **modular architecture** where each concern is separated into its own file:
 
-Global variables will be minimized and controlled.
+```
+main.c
+  └── Initializes GUI framework
+  └── Creates the main window
+  └── Runs the Windows message loop
 
-Internal implementation details will be hidden from other parts of the program.
+gui.c
+  └── Handles all user interface logic
+  └── Creates buttons, input fields, and result table
+  └── Responds to user actions (Search, Browse, Clear)
+  └── Calls search.c when the user triggers a search
 
-This will ensure that internal components will not be misused unintentionally and that the program’s behavior will remain predictable. Encapsulation will also help prevent naming conflicts and will improve overall code safety.
+search.c
+  └── Accepts a directory path and a search term
+  └── Recursively walks through all subdirectories
+  └── Checks each file/folder name for a match (case-insensitive)
+  └── Returns results as a linked list
+
+utils.c
+  └── str_contains_ci()  — case-insensitive substring check
+  └── to_lowercase()     — converts a string to lowercase
+  └── format_size()      — formats a byte count as B / KB / MB
+```
+
+---
+
+## How It Works
+
+### Search Algorithm
+
+1. The user provides a **root directory** and a **search term**
+2. `search_by_name()` in `search.c` opens the root directory using the Windows `FindFirstFileA` API
+3. For every entry found:
+   - If it is a **folder**: check if the folder name contains the search term, then recurse into it
+   - If it is a **file**: check if the file name contains the search term
+4. Every match is added to a **singly linked list** (`ResultNode`)
+5. After the search completes, `gui.c` reads the linked list and populates the `ListView` table
+6. Memory is freed after the results are displayed or when the user clears the list
+
+### String Matching
+
+Matching is done using a **case-insensitive contains** check. Both the file name and the search term are converted to lowercase before comparison. This means searching for `Photo` will also match `photo_2024.jpg`, `PHOTO_backup`, and `my_photos`.
+
+---
+
+## Tech Stack
+
+| Component        | Technology                        |
+|------------------|-----------------------------------|
+| Language         | C (C99 standard)                  |
+| GUI Framework    | Windows API (WinAPI)              |
+| UI Controls      | LISTVIEW, EDIT, BUTTON (Win32)    |
+| File System API  | FindFirstFileA / FindNextFileA    |
+| Folder Dialog    | SHBrowseForFolderA (Shell API)    |
+| Compiler         | GCC via MinGW                     |
+| Build System     | Windows Batch Script (.bat)       |
+| Target OS        | Windows 7 / 8 / 10 / 11          |
+
+---
+
+## Known Limitations
+
+- **Windows only** — uses WinAPI exclusively, not cross-platform
+- **No file content search** — only searches by file/folder name
+- **No export feature** — results cannot be saved to a file
+- Very large directories with thousands of files may take a few seconds to scan
+
+---
+
+## Future Improvements
+
+- Add extension-based filtering (e.g., search only `.pdf` or `.txt` files)
+- Add a progress indicator while search is running
+- Allow exporting search results to a `.txt` or `.csv` file
+- Add date modified / file size filters
+- Support searching by partial extension
+
+---
+
+## License
+
+Free to use, modify, and distribute.
+
