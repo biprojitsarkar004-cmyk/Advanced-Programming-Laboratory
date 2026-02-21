@@ -1,0 +1,9 @@
+# Compiled files
+bin/
+build/
+*.exe
+*.o
+*.a
+
+# VS Code
+.vscode/
