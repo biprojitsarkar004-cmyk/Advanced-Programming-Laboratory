@@ -43,43 +43,6 @@ A lightweight Windows desktop application written in **C language** that allows 
 ## Requirements
 
 - **Operating System:** Windows 7 or later
-- **Compiler:** GCC via MinGW — download from [winlibs.com](https://winlibs.com)
-
----
-
-## Installation
-
-### Step 1 — Download MinGW
-
-Go to [winlibs.com](https://winlibs.com) and download the latest **GCC + MinGW-w64** release (Win64, ZIP format).
-
-### Step 2 — Extract MinGW
-
-Extract the ZIP file and place the folder at:
-```
-C:\mingw64
-```
-
-### Step 3 — Add MinGW to PATH
-
-1. Open Start Menu and search for **"Environment Variables"**
-2. Click **"Edit the system environment variables"**
-3. Under **System Variables**, find **Path** and click **Edit**
-4. Click **New** and add:
-   ```
-   C:\mingw64\bin
-   ```
-5. Click **OK** on all dialogs
-
-### Step 4 — Verify Installation
-
-Open a terminal (PowerShell or CMD) and run:
-```
-gcc --version
-```
-If a version number appears, the installation was successful.
-
----
 
 ## Build
 
