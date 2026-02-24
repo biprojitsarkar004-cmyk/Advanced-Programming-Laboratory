@@ -176,62 +176,139 @@ utils.c
   └── format_size()      — formats a byte count as B / KB / MB
 ```
 
----
+Difference Between Version 1 and Version 2
 
-## How It Works
+Overview
+Version 1 is a single-file implementation where GUI, search logic, and utility functions are combined in one source file.
+Version 2 is a modular implementation where responsibilities are separated into multiple files (main, GUI, search, utilities).
 
-### Search Algorithm
+1. Project Structure
 
-1. The user provides a **root directory** and a **search term**
-2. `search_by_name()` in `search.c` opens the root directory using the Windows `FindFirstFileA` API
-3. For every entry found:
-   - If it is a **folder**: check if the folder name contains the search term, then recurse into it
-   - If it is a **file**: check if the file name contains the search term
-4. Every match is added to a **singly linked list** (`ResultNode`)
-5. After the search completes, `gui.c` reads the linked list and populates the `ListView` table
-6. Memory is freed after the results are displayed or when the user clears the list
+Version 1:
 
-### String Matching
+* Entire program exists in one file.
+* GUI logic, search logic, and helper functions are mixed together.
+* High coupling between components.
 
-Matching is done using a **case-insensitive contains** check. Both the file name and the search term are converted to lowercase before comparison. This means searching for `Photo` will also match `photo_2024.jpg`, `PHOTO_backup`, and `my_photos`.
+Version 2:
 
----
+* Divided into multiple source files:
 
-## Tech Stack
+  * main (program entry and window registration)
+  * gui (all UI-related logic)
+  * search (recursive search and result creation)
+  * utils (string utilities and formatting)
+* Clear separation of responsibilities.
+* Lower coupling and better organization.
 
-| Component        | Technology                        |
-|------------------|-----------------------------------|
-| Language         | C (C99 standard)                  |
-| GUI Framework    | Windows API (WinAPI)              |
-| UI Controls      | LISTVIEW, EDIT, BUTTON (Win32)    |
-| File System API  | FindFirstFileA / FindNextFileA    |
-| Folder Dialog    | SHBrowseForFolderA (Shell API)    |
-| Compiler         | GCC via MinGW                     |
-| Build System     | Windows Batch Script (.bat)       |
-| Target OS        | Windows 7 / 8 / 10 / 11          |
+2. Separation of Concerns
 
----
+Version 1:
 
-## Known Limitations
+* Search functions directly interact with GUI elements.
+* Search logic depends on UI components.
+* Hard to reuse search logic outside the GUI.
 
-- **Windows only** — uses WinAPI exclusively, not cross-platform
-- **No file content search** — only searches by file/folder name
-- **No export feature** — results cannot be saved to a file
-- Very large directories with thousands of files may take a few seconds to scan
+Version 2:
 
----
+* Search layer returns structured results.
+* GUI layer only displays results.
+* Search logic is independent of UI.
+* Code is reusable in other contexts (CLI, API, library).
 
-## Future Improvements
+3. Data Handling
 
-- Add extension-based filtering (e.g., search only `.pdf` or `.txt` files)
-- Add a progress indicator while search is running
-- Allow exporting search results to a `.txt` or `.csv` file
-- Add date modified / file size filters
-- Support searching by partial extension
+Version 1:
 
----
+* Uses simple buffers and global variables.
+* Stores limited result information.
+* No structured data model.
 
-## License
+Version 2:
 
-Free to use, modify, and distribute.
+* Uses a linked list (ResultNode) to store:
+
+  * Path
+  * Type (FILE or FOLDER)
+  * Size
+* Supports multiple results properly.
+* More flexible and extendable.
+
+4. Memory Management
+
+Version 1:
+
+* Mostly static memory.
+* Minimal dynamic allocation.
+* Simpler but less scalable.
+
+Version 2:
+
+* Uses dynamic memory (malloc).
+* Provides proper cleanup function (free_results).
+* More suitable for large and scalable applications.
+
+5. User Interface
+
+Version 1:
+
+* Uses basic ListBox.
+* Minimal styling.
+* Limited result visualization.
+
+Version 2:
+
+* Uses ListView in report mode.
+* Multiple columns (Type, Path, Size).
+* Gridlines and full row selection.
+* Custom fonts and colors.
+* Status updates and clear functionality.
+* More polished and user-friendly interface.
+
+6. Maintainability
+
+Version 1:
+
+* Harder to debug because everything is in one file.
+* Changes in one area may affect unrelated parts.
+* Difficult to extend cleanly.
+
+Version 2:
+
+* Easier to debug due to modular separation.
+* Changes are isolated within specific files.
+* Cleaner and more maintainable structure.
+
+7. Scalability
+
+Version 1:
+
+* Difficult to extend with new features.
+* Adding sorting, filtering, or exporting would require significant refactoring.
+
+Version 2:
+
+* Easier to extend.
+* Can add features like sorting, filtering, exporting, or threading more cleanly.
+* Better foundation for future growth.
+
+8. Code Quality Level
+
+Version 1:
+
+* Suitable for learning or small prototype.
+* Functional but tightly coupled.
+
+Version 2:
+
+* Structured and closer to production-level design.
+* Demonstrates better architectural thinking.
+* More aligned with professional software development practices.
+
+Final Conclusion
+
+Version 1 demonstrates functional implementation in a simple structure.
+Version 2 improves significantly by introducing modular architecture, structured data handling, better separation of concerns, improved UI design, and enhanced maintainability.
+
+Overall, Version 2 is more scalable, maintainable, reusable, and closer to professional software engineering standards.
 
