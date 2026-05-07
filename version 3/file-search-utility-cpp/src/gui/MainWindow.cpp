@@ -3,9 +3,12 @@
 #include <shlobj.h>
 
 MainWindow::MainWindow()
+    // MVC: pass this View to the Controller through ISearchView.
+    // The Controller will call View methods, but it will not know Win32 details.
     : controller_(std::make_unique<SearchController>(*this)) {}
 
 bool MainWindow::create(HINSTANCE hInstance, int nCmdShow) {
+    // View responsibility: create and show the main Win32 window.
     hInst_ = hInstance;
 
     INITCOMMONCONTROLSEX icex{ sizeof(icex), ICC_LISTVIEW_CLASSES };
@@ -71,6 +74,8 @@ LRESULT MainWindow::handleMessage(HWND hwnd, UINT msg,
 }
 
 void MainWindow::onCreate(HWND hwnd) {
+    // View responsibility: create all UI controls.
+    // No search logic is written here.
     hwnd_ = hwnd;
 
     auto make = [&](const char* cls, const char* txt,
@@ -107,6 +112,11 @@ void MainWindow::onCreate(HWND hwnd) {
 }
 
 void MainWindow::onCommand(WPARAM wParam) {
+    /*
+     * MVC event flow:
+     * The View receives button-click events from Win32.
+     * For Search and Clear, it delegates the work to the Controller.
+     */
     switch (LOWORD(wParam)) {
         case ID_BTN_BROWSE:
             browseFolder();
@@ -136,14 +146,17 @@ void MainWindow::browseFolder() {
 }
 
 std::string MainWindow::directoryText() const {
+    // Controller calls this to read the selected directory from the View.
     return getDlgText(ID_EDIT_DIR);
 }
 
 std::string MainWindow::queryText() const {
+    // Controller calls this to read the search query from the View.
     return getDlgText(ID_EDIT_QUERY);
 }
 
 SearchMode MainWindow::selectedSearchMode() const {
+    // Controller calls this to know which radio button the user selected.
     if (IsDlgButtonChecked(hwnd_, ID_RADIO_EXT) == BST_CHECKED)
         return SearchMode::Extension;
     if (IsDlgButtonChecked(hwnd_, ID_RADIO_CONTENT) == BST_CHECKED)
@@ -152,27 +165,33 @@ SearchMode MainWindow::selectedSearchMode() const {
 }
 
 void MainWindow::showWarning(const std::string& message) {
+    // Controller calls this when input validation fails.
     MessageBoxA(hwnd_, message.c_str(), "Missing Input", MB_ICONWARNING);
 }
 
 void MainWindow::setBusy(bool busy) {
+    // Controller calls this before and after a search.
     SetCursor(LoadCursor(nullptr, busy ? IDC_WAIT : IDC_ARROW));
 }
 
 void MainWindow::showResults(const std::vector<SearchResult>& results) {
+    // Controller gives Model results to the View for display.
     listView_.populate(results);
 }
 
 void MainWindow::showResultCount(std::size_t count) {
+    // Controller calls this to update the result count label.
     const std::string text = "Results: " + std::to_string(count);
     SetDlgItemTextA(hwnd_, ID_STATIC_COUNT, text.c_str());
 }
 
 void MainWindow::setStatusText(const std::string& text) {
+    // Controller calls this to update the bottom status text.
     SetDlgItemTextA(hwnd_, ID_STATIC_STATUS, text.c_str());
 }
 
 std::string MainWindow::getDlgText(int ctrlId) const {
+    // Small View helper for reading text from a Win32 edit control.
     char buf[MAX_PATH] = {};
     GetDlgItemTextA(hwnd_, ctrlId, buf, MAX_PATH);
     return buf;
